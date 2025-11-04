@@ -1,10 +1,15 @@
 package com.project.userInfo;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,7 +33,7 @@ import lombok.Setter;
 @Builder // 👈 Builder 패턴 추가
 @Table(name = "user_info") // DDL의 테이블 이름과 매핑
 @EntityListeners(AuditingEntityListener.class) // JPA Auditing 활성화
-public class UserInfo {
+public class UserInfo implements UserDetails {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -68,6 +73,44 @@ public class UserInfo {
     @LastModifiedDate // 엔티티 수정 시 자동 저장
     @Column(name = "EDIT_DATE", nullable = false)
     private Date editDate;
+
+    
+    /**
+     * 사용자의 권한(ROLE) 반환
+     */
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return List.of(new SimpleGrantedAuthority(this.role));
+	}
+
+	/**
+	 * 사용자 아이디(USER_ID) 반환 -> Security에서는 'username'으로 통칭
+	 */
+	@Override
+	public String getUsername() {
+		return this.userId;
+	}
+
+	/**
+	 * 사용자 비밀번호(USER_PW) 반환
+	 */
+	@Override
+	public String getPassword() {
+		return this.userPw;
+	}
+
+	
+    @Override
+    public boolean isAccountNonExpired() { return true; } // 계정 만료 여부
+    
+    @Override
+    public boolean isAccountNonLocked() { return true; } // 계정 잠금 여부
+    
+    @Override
+    public boolean isCredentialsNonExpired() { return true; } // 비밀번호 만료 여부
+    
+    @Override
+    public boolean isEnabled() { return true; } // 계정 활성화 여부
 
     // 서비스에서 사용할 빌더 (JPA 기본 생성자 @NoArgsConstructor도 필요)
 //    @Builder

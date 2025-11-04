@@ -2,44 +2,73 @@ package com.project.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 	
+	private final WebConfig webConfig;
+	
+	/**
+	 * 비밀번호 암호화 -> UserService에서 사용
+	 * @return
+	 */
 	@Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+	
+	/**
+     * 인증 관리자(AuthenticationManager) Bean 등록
+     * (UserService에서 "로그인 인증" 시 사용)
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
-	@Bean
+	
+	/**
+     * Spring Security의 메인 필터 체인 설정
+     */
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. CSRF(Cross-Site Request Forgery) 보호 비활성화
-            // React 같은 SPA와 API 서버 연동 시에는 보통 비활성화
-            .csrf(AbstractHttpConfigurer::disable)
+            // 1. API 서버이므로 CSRF, FormLogin, HttpBasic 비활성화
+            .csrf(csrf -> csrf.disable())
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
 
-            // 2. HTTP Basic 인증 비활성화 (ID/PW 팝업창 끄기)
-            .httpBasic(AbstractHttpConfigurer::disable)
+            // 2. 세션을 사용하지 않고, JWT를 사용 (Stateless)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            
+            // 3. CORS 설정 (WebConfig에서 만든 Bean을 사용)
+            .cors(cors -> cors.configurationSource(webConfig.corsConfigurationSource()))
 
-            // 3. 로그인 Alert 비활성화 
-            .formLogin(AbstractHttpConfigurer::disable)
-
-            // 4. 요청 경로별 권한 설정
+            // 4. API 경로별 권한 설정
             .authorizeHttpRequests(authorize -> authorize
-                // '/api/**'로 시작하는 모든 요청은 허용
-                .requestMatchers("/api/**").permitAll() 
-                
-                // 그 외 모든 요청은 인증 필요
-                .anyRequest().authenticated() 
+                // 회원가입, 로그인은 누구나 허용 (permitAll)
+                .requestMatchers("/api/signup", "/api/login").permitAll()
+                // 관리자 API는 "ROLE_ADMIN" 권한 필요 (ROLE_ 제외하고 "ADMIN"만 씀)
+                .requestMatchers("/api/mngr/**").hasRole("ADMIN") 
+                // 그 외 /api/로 시작하는 모든 요청은 인증(로그인) 필요
+                .requestMatchers("/api/**").authenticated() 
+                // (React 라우터가 페이지를 로드할 수 있도록 그 외 경로는 허용)
+                .anyRequest().permitAll()
             );
-
+            
         return http.build();
     }
 }
