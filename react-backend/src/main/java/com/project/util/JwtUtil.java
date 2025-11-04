@@ -28,7 +28,7 @@ public class JwtUtil {
     
     private Key key; // 암호화된 비밀 키
     
-    private JwtParser jwtParser; // 토큰 파싱(해석)기
+    private JwtParser jwtParser; // 토큰 파싱기
     
     @PostConstruct		// 객체(Bean)가 생성된 직후에 이 메서드를 실행
     public void init() {
@@ -53,8 +53,8 @@ public class JwtUtil {
 
         // 2. 토큰 생성
         return Jwts.builder()
-                .setSubject(authentication.getName()) // 👈 토큰 제목 (사용자 ID)
-                .claim("auth", authorities) // 👈 "auth"라는 이름으로 권한 정보 저장
+                .setSubject(authentication.getName()) // 토큰 제목 (사용자 ID)
+                .claim("auth", authorities) // "auth"라는 이름으로 권한 정보 저장
                 .setIssuedAt(new Date(System.currentTimeMillis())) // 발행 시간
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime)) // 만료 시간
                 .signWith(key, SignatureAlgorithm.HS256) // 사용할 암호화 키와 알고리즘
