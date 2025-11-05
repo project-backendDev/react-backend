@@ -38,27 +38,27 @@ public class UserInfoService implements UserDetailsService {
 	 * 회원가입 메소드
 	 */
 	@Transactional
-	public void userRegist(UserInfoRequest userRequest) {
+	public void userRegist(UserInfoInsertRequest userInfoInsertRequest) {
 		
 		// 아이디 중복검사
-		if (userRepository.existsByUserId(userRequest.getUserId())) {
+		if (userRepository.existsByUserId(userInfoInsertRequest.getUserId())) {
 			throw new DuplicateDataException("이미 사용 중인 아이디입니다.");
 		}
 		
 		// 이메일 중복검사
-		if (userRepository.existsByUserEmail(userRequest.getUserEmail())) {
+		if (userRepository.existsByUserEmail(userInfoInsertRequest.getUserEmail())) {
 			throw new DuplicateDataException("이미 사용 중인 이메일입니다.");
 		}
 		
 		// 비밀번호 암호화
-		String encodePassword = passwordEncoder.encode(userRequest.getUserPw());
+		String encodePassword = passwordEncoder.encode(userInfoInsertRequest.getUserPw());
 		
 		// UserInfo 엔티티 생성
 		UserInfo userInfo = UserInfo.builder()
-						.userId(userRequest.getUserId())
+						.userId(userInfoInsertRequest.getUserId())
 						.userPw(encodePassword)
-						.userNm(userRequest.getUserNm())
-						.userEmail(userRequest.getUserEmail())
+						.userNm(userInfoInsertRequest.getUserNm())
+						.userEmail(userInfoInsertRequest.getUserEmail())
 						.role("ROLE_USER")
 						.loginType("SITE")
 						.build();
@@ -67,6 +67,42 @@ public class UserInfoService implements UserDetailsService {
 		userRepository.save(userInfo);
 	}
 	
+
+	/**
+	 * 회원정보 조회 메소드
+	 * @param userId
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public UserInfoResponse getUserInfo(String userId) {
+		
+		UserInfo userInfo = userRepository.findByUserId(userId)
+							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+		
+		return UserInfoResponse.from(userInfo);
+	}
+	
+	/**
+	 * 회원정보 수정 메소드
+	 * @return
+	 */
+	@Transactional
+	public void userUpdate(UserInfoUpdateRequest userInfoUpdateRequest, String userId) {
+		
+		// 현재 로그인 한 사용자를 찾음
+		UserInfo userInfo = userRepository.findByUserId(userId)
+							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+		
+		// 이메일 중복 검사
+		if (userRepository.existsByUserEmail(userInfoUpdateRequest.getUserEmail())) {
+			throw new DuplicateDataException("이미 사용 중인 이메일입니다.");
+		}
+		
+		userInfo.setUserNm(userInfoUpdateRequest.getUserNm());
+		userInfo.setUserEmail(userInfoUpdateRequest.getUserEmail());
+		
+		//	@Transactional이 끝날 때, UserInfo 객체를 감지하여 자동으로 DB에 UPDATE 쿼리를 날리기 때문에 userRepository.save() 호출 불필요
+	}
 	
 	
 	/*
@@ -91,6 +127,12 @@ public class UserInfoService implements UserDetailsService {
 				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
 	}
 	
+	/**
+	 * 로그인 메소드
+	 * @param loginRequest
+	 * @return
+	 * @throws AuthenticationException
+	 */
 	@Transactional
 	public LoginResponse loginProccess(LoginRequest loginRequest) throws AuthenticationException {
 		
