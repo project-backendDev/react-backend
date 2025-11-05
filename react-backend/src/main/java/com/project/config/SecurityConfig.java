@@ -2,7 +2,6 @@ package com.project.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +10,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.project.util.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 	
 	private final WebConfig webConfig;
+	
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 	
 	/**
 	 * 비밀번호 암호화 -> UserService에서 사용
@@ -67,8 +71,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/**").authenticated() 
                 // (React 라우터가 페이지를 로드할 수 있도록 그 외 경로는 허용)
                 .anyRequest().permitAll()
-            );
-            
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        
         return http.build();
     }
 }

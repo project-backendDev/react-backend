@@ -1,4 +1,4 @@
-package com.project.userInfo;
+package com.project.userInfo.model;
 
 import java.util.Collection;
 import java.util.Date;
@@ -24,10 +24,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 기본 생성자 protected
 @AllArgsConstructor // 모든 필드를 포함한 생성자
 @Builder // 👈 Builder 패턴 추가

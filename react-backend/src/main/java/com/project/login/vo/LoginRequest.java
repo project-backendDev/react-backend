@@ -1,4 +1,4 @@
-package com.project.login;
+package com.project.login.vo;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

@@ -1,6 +1,8 @@
-package com.project.userInfo;
+package com.project.userInfo.vo;
 
 import java.util.Date;
+
+import com.project.userInfo.model.UserInfo;
 
 import lombok.Builder;
 import lombok.Getter;

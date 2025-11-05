@@ -1,4 +1,4 @@
-package com.project.userInfo;
+package com.project.userInfo.web;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.login.LoginRequest;
-import com.project.login.LoginResponse;
+import com.project.userInfo.service.UserInfoService;
+import com.project.userInfo.vo.UserInfoInsertRequest;
+import com.project.userInfo.vo.UserInfoResponse;
+import com.project.userInfo.vo.UserInfoUpdateRequest;
+import com.project.util.JwtUtil;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class UserInfoController {
 	
 	private final UserInfoService userService;
-
+	
 	/**
 	 * 회원가입 API
 	 * @param userInsertRequest
@@ -37,13 +40,7 @@ public class UserInfoController {
 		return ResponseEntity.status(201).body("회원가입이 완료되었습니다.");
 	}
 	
-	/**
-	 * 로그인 API
-	 */
-	@PostMapping("/login")
-	public ResponseEntity<LoginResponse> loginProcess(@Valid @RequestBody LoginRequest loginRequest) {
-		return ResponseEntity.ok(userService.loginProccess(loginRequest));
-	}
+	
 	
 	/**
 	 * 회원정보 조회 API

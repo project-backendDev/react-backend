@@ -1,8 +1,10 @@
-package com.project.userInfo;
+package com.project.userInfo.repository;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.project.userInfo.model.UserInfo;
 
 public interface UserInfoRepository extends JpaRepository<UserInfo, Integer> {
 

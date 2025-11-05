@@ -1,4 +1,4 @@
-package com.project.login;
+package com.project.login.vo;
 
 import lombok.Getter;
 
