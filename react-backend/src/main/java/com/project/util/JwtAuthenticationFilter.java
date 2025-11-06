@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.project.userInfo.service.UserInfoCustomDetailService;
 import com.project.userInfo.service.UserInfoService;
 
 import jakarta.servlet.FilterChain;
@@ -24,7 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
 	
-    private final UserInfoService userInfoService;
+    private final UserInfoCustomDetailService userInfoCustomDetailService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, 
@@ -41,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String userId = jwtUtil.extractUsername(token);
 
             // 4. DB에서 사용자 정보(UserDetails) 조회
-            UserDetails userDetails = userInfoService.loadUserByUsername(userId);
+            UserDetails userDetails = userInfoCustomDetailService.loadUserByUsername(userId);
 
             // 5. "인증(Authentication)" 객체 생성 (비밀번호는 null)
             Authentication authentication = new UsernamePasswordAuthenticationToken(

@@ -23,7 +23,7 @@ public class LoginController {
 	/**
 	 * 로그인 API
 	 */
-	@PostMapping("/login")
+	@PostMapping("/user/login")
 	public ResponseEntity<LoginResponse> loginProcess(@Valid @RequestBody LoginRequest loginRequest) {
 		return ResponseEntity.ok(loginService.loginProccess(loginRequest));
 	}

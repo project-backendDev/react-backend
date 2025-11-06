@@ -3,9 +3,6 @@ package com.project.userInfo.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,11 +18,10 @@ import com.project.userInfo.vo.UserInfoUpdateRequest;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor(onConstructor_ = @Lazy)
-//@RequiredArgsConstructor
-public class UserInfoService implements UserDetailsService {
+@RequiredArgsConstructor
+public class UserInfoService {
 
-	private final UserInfoRepository userRepository;
+	private final UserInfoRepository userInfoRepository;
 	
 	private final PasswordEncoder passwordEncoder;
 	
@@ -36,12 +32,12 @@ public class UserInfoService implements UserDetailsService {
 	public void userRegist(UserInfoInsertRequest userInfoInsertRequest) {
 		
 		// 아이디 중복검사
-		if (userRepository.existsByUserId(userInfoInsertRequest.getUserId())) {
+		if (userInfoRepository.existsByUserId(userInfoInsertRequest.getUserId())) {
 			throw new DuplicateDataException("이미 사용 중인 아이디입니다.");
 		}
 		
 		// 이메일 중복검사
-		if (userRepository.existsByUserEmail(userInfoInsertRequest.getUserEmail())) {
+		if (userInfoRepository.existsByUserEmail(userInfoInsertRequest.getUserEmail())) {
 			throw new DuplicateDataException("이미 사용 중인 이메일입니다.");
 		}
 		
@@ -59,16 +55,26 @@ public class UserInfoService implements UserDetailsService {
 						.build();
 						
 		// 생성된 엔티티를 저장
-		userRepository.save(userInfo);
+		userInfoRepository.save(userInfo);
 	}
 
+	
 	/**
-     * Spring Security가 "신분증(UserDetails)"을 요청할 때 호출
-     */
+	 * 회원정보수정 페이지 넘어가기 전 비밀번호가 일치하는지 체크하는 매소드
+	 * @param userId
+	 * @param userPw
+	 */
 	@Transactional(readOnly = true)
-	public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-		return userRepository.findByUserId(userId)
+	public void confirmPassword(String userId, String userPw) {
+		
+		// DB에서 현재 사용자 정보 획득
+		UserInfo userInfo = userInfoRepository.findByUserId(userId)
 				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+		
+		// DB에 저장된 비밀번호와 입력된 비밀번호를 비교
+		if (!passwordEncoder.matches(userPw, userInfo.getUserPw())) {
+			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+		}
 	}
 
 	/**
@@ -79,7 +85,7 @@ public class UserInfoService implements UserDetailsService {
 	@Transactional(readOnly = true)
 	public UserInfoResponse getUserInfo(String userId) {
 		
-		UserInfo userInfo = userRepository.findByUserId(userId)
+		UserInfo userInfo = userInfoRepository.findByUserId(userId)
 							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
 		
 		return UserInfoResponse.from(userInfo);
@@ -94,11 +100,11 @@ public class UserInfoService implements UserDetailsService {
 	public void userUpdate(UserInfoUpdateRequest userInfoUpdateRequest, String userId) {
 		
 		// 현재 로그인 한 사용자를 찾음
-		UserInfo userInfo = userRepository.findByUserId(userId)
+		UserInfo userInfo = userInfoRepository.findByUserId(userId)
 							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 		
 		// 이메일 중복 검사
-		if (userRepository.existsByUserEmail(userInfoUpdateRequest.getUserEmail())) {
+		if (userInfoRepository.existsByUserEmail(userInfoUpdateRequest.getUserEmail())) {
 			throw new DuplicateDataException("이미 사용 중인 이메일입니다.");
 		}
 		
@@ -114,7 +120,7 @@ public class UserInfoService implements UserDetailsService {
 	 * 전체 회원 조회 메소드
 	 */
 	public List<UserInfoResponse> getAllUserList() {
-		return userRepository.findAll()
+		return userInfoRepository.findAll()
 					.stream()
 					.map(UserInfoResponse::from)
 					.collect(Collectors.toList());
