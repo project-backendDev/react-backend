@@ -1,3 +1,4 @@
-INSERT INTO user_info VALUES (NULL, 'admin', '$2a$10$LcirrcqXIrH1TGy8ZA6JUORUyDQeNZN3FNQFQdLCV0I8iN1T4amI.', '관리자', 'admin@naver.com', 'ROLE_ADMIN', 'SITE', now(), now());
+-- user_info 테이블 데이터
+INSERT INTO user_info VALUES (NULL, 'admin', '$2a$10$LcirrcqXIrH1TGy8ZA6JUORUyDQeNZN3FNQFQdLCV0I8iN1T4amI.', '관리자', 'admin@naver.com', 'ROLE_ADMIN', 'SITE', 'Y', now(), now());
 
 commit;

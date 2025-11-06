@@ -2,9 +2,12 @@ package com.project.login.service;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,20 +35,29 @@ public class LoginService {
 	@Transactional
 	public LoginResponse loginProccess(LoginRequest loginRequest) throws AuthenticationException {
 		
-		// 1. AuthenticationManager에게 "인증"을 요청
-        //    (이 과정에서 loadUserByUsername이 호출되고, 비밀번호 비교가 자동으로 일어남)
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                		loginRequest.getUserId(),
-                		loginRequest.getUserPw()
-                )
-        );
-        
-        // 2. 인증에 성공했다면, JwtUtil을 이용해 "권한이 포함된" 토큰을 생성
-        String token = jwtUtil.generateToken(authentication);
-        
-        // 3. 토큰을 DTO에 담아 반환
-        return new LoginResponse(token);
+		try {
+			// 1. AuthenticationManager에게 "인증"을 요청
+			//    (이 과정에서 loadUserByUsername이 호출되고, 비밀번호 비교가 자동으로 일어남)
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(
+							loginRequest.getUserId(),
+							loginRequest.getUserPw()
+							)
+					);
+			
+			// 2. 인증에 성공했다면, JwtUtil을 이용해 "권한이 포함된" 토큰을 생성
+			String token = jwtUtil.generateToken(authentication);
+			
+			// 3. 토큰을 DTO에 담아 반환
+			return new LoginResponse(token);
+			
+		} catch (DisabledException e) {
+			throw new DisabledException("탈퇴한 회원입니다.");
+		} catch (AuthenticationException e) {
+			throw new UsernameNotFoundException("아이디 또는 비밀번호가 일치하지 않습니다.");
+		} catch (Exception e) {
+			throw new BadCredentialsException("로그인 처리 중 오류가 발생했습니다.");
+		}
 	}
 
 

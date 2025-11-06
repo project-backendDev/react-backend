@@ -66,6 +66,10 @@ public class UserInfo implements UserDetails {
     @Column(name = "LOGIN_TYPE", nullable = false, length = 10)
     private String loginType;
     
+    /* 계정상태 (활성 : Y / 비활성 : N) */
+    @Column(name = "STATUS", nullable = false, length = 10)
+    private String status;
+    
     /* 생성일 */
     @CreatedDate // 엔티티 생성 시 자동 저장
     @Column(name = "REG_DATE", nullable = false, updatable = false)

@@ -16,4 +16,5 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Integer> {
     
     // 로그인 시 사용
     Optional<UserInfo> findByUserId(String userId);
+    
 }

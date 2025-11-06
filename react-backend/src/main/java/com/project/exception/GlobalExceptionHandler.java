@@ -2,6 +2,8 @@ package com.project.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -41,6 +43,12 @@ public class GlobalExceptionHandler {
                 .body("아이디 또는 비밀번호가 올바르지 않습니다.");
     }
 
+    @ExceptionHandler({DisabledException.class})
+    public ResponseEntity<String> handleDisabledException(Exception e) {
+    	return ResponseEntity.status(HttpStatus.NOT_FOUND)
+    			.body("탈퇴한 사용자입니다.");
+    }
+    
     /**
      * 그 외 모든 서버 내부 예외 (최종 안전망)
      */

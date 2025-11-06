@@ -3,11 +3,13 @@ package com.project.userInfo.web;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.userInfo.service.UserInfoService;
@@ -49,10 +51,6 @@ public class UserInfoController {
 	@PostMapping("/user/confirm-password")
 	public ResponseEntity<String> confirmPassword(@AuthenticationPrincipal UserDetails userDetails,
 												  @Valid @RequestBody UserInfoPwdCheckRequest userInfoPwdCheckRequest) {
-		
-		System.out.println("[S] Confirm Controller");
-		System.out.println("userId		::	" + userDetails.getUsername());
-		System.out.println("userPw		::	" + userInfoPwdCheckRequest.getUserPw());
 	
 		userInfoService.confirmPassword(userDetails.getUsername(), userInfoPwdCheckRequest.getUserPw());
 		
@@ -90,9 +88,21 @@ public class UserInfoController {
 	}
 	
 	
-	
-	
-	
+	/**
+	 * 회원탈퇴 API
+	 * DB에서 데이터 삭제가 아닌 상태값 변경 관리로 진행
+	 */
+	@DeleteMapping("/user/me")
+	public ResponseEntity<String> userDelete(@AuthenticationPrincipal UserDetails userDetails) {
+		
+		// 인증된 사용자의 userId를 가져옴
+		String userId = userDetails.getUsername();
+		
+		// 회원탈퇴 (상태값 Y -> N)
+		userInfoService.userDelete(userId);
+		
+		return ResponseEntity.ok("회원탈퇴를 완료했습니다.");
+	}
 	
 	
 	

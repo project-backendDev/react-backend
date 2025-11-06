@@ -1,6 +1,7 @@
 package com.project.userInfo.service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -52,6 +53,7 @@ public class UserInfoService {
 						.userEmail(userInfoInsertRequest.getUserEmail())
 						.role("ROLE_USER")
 						.loginType("SITE")
+						.status("Y")
 						.build();
 						
 		// 생성된 엔티티를 저장
@@ -104,9 +106,10 @@ public class UserInfoService {
 							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 		
 		// 이메일 중복 검사
-		if (userInfoRepository.existsByUserEmail(userInfoUpdateRequest.getUserEmail())) {
-			throw new DuplicateDataException("이미 사용 중인 이메일입니다.");
-		}
+		// 회원 수정할 때에는 중복검사가 필요할까..?
+//		if (userInfoRepository.existsByUserEmail(userInfoUpdateRequest.getUserEmail())) {
+//			throw new DuplicateDataException("이미 사용 중인 이메일입니다.");
+//		}
 		
 		userInfo.setUserNm(userInfoUpdateRequest.getUserNm());
 		userInfo.setUserEmail(userInfoUpdateRequest.getUserEmail());
@@ -114,6 +117,29 @@ public class UserInfoService {
 		//	@Transactional이 끝날 때, UserInfo 객체를 감지하여 자동으로 DB에 UPDATE 쿼리를 날리기 때문에 userRepository.save() 호출 불필요
 	}
 	
+	/**
+	 * 회원탈퇴 메소드
+	 * STATUS를 Y -> N 으로 변경
+	 * @param userId
+	 */
+	@Transactional
+	public void userDelete(String userId) {
+		
+		// 현재 로그인 한 사용자를 찾음
+		UserInfo userInfo = userInfoRepository.findByUserId(userId)
+							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+
+		String randomPassword = UUID.randomUUID().toString();
+		System.out.println("PWD");
+		System.out.println(randomPassword);
+		String encPassword = passwordEncoder.encode(randomPassword);
+		String anonyEmail = userInfo.getUserSeq() + "@delete.com";
+		
+		userInfo.setUserNm("탈퇴회원");
+		userInfo.setUserPw(encPassword);
+		userInfo.setUserEmail(anonyEmail);
+		userInfo.setStatus("N");
+	}
 	
 	/*
 	 * [관리자]
