@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.project.exception.DuplicateDataException;
 import com.project.userInfo.model.UserInfo;
 import com.project.userInfo.repository.UserInfoRepository;
+import com.project.userInfo.vo.AdminUserInfoDetail;
+import com.project.userInfo.vo.AdminUserInfoUpdate;
 import com.project.userInfo.vo.UserInfoInsertRequest;
 import com.project.userInfo.vo.UserInfoResponse;
 import com.project.userInfo.vo.UserInfoUpdateRequest;
@@ -145,6 +147,7 @@ public class UserInfoService {
 	 * [관리자]
 	 * 전체 회원 조회 메소드
 	 */
+	@Transactional(readOnly = true)
 	public List<UserInfoResponse> getAllUserList() {
 		return userInfoRepository.findAll()
 					.stream()
@@ -152,6 +155,26 @@ public class UserInfoService {
 					.collect(Collectors.toList());
 	}
 
-
+	/**
+	 * [관리자] 단일 회원 조회 메소드
+	 * @param userId
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public AdminUserInfoDetail getUserDetail(String userId) {
+		UserInfo userInfo = userInfoRepository.findByUserId(userId)
+							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+		
+		return new AdminUserInfoDetail(userInfo);
+	}
+	
+	/**
+	 * [관리자] 단일 회원 정보수정
+	 */
+//	@Transactional
+//	public void AdminUserInfoUpdate adminUpdateUserInfo(String userId, AdminUserInfoUpdate adminUserInfoUpdate) {
+//		UserInfo userInfo = userInfoRepository.findByUserId(userId)
+//				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+//	}
 	
 }
