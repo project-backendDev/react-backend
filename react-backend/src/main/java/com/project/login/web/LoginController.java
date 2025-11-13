@@ -25,7 +25,7 @@ public class LoginController {
 	 */
 	@PostMapping("/user/login")
 	public ResponseEntity<LoginResponse> loginProcess(@Valid @RequestBody LoginRequest loginRequest) {
-		return ResponseEntity.ok(loginService.loginProccess(loginRequest));
+		return ResponseEntity.ok(loginService.loginProcess(loginRequest));
 	}
 	
 }
