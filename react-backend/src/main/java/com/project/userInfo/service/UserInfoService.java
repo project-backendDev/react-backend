@@ -1,5 +1,6 @@
 package com.project.userInfo.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -142,6 +143,7 @@ public class UserInfoService {
 		userInfo.setUserPw(encPassword);
 		userInfo.setUserEmail(anonyEmail);
 		userInfo.setStatus("N");
+		userInfo.setWithdrawDate(new Date());
 	}
 	
 	/*
@@ -164,8 +166,6 @@ public class UserInfoService {
 		// Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
 		// 안전성 보장이 되지 않아 뜨는 오류여서 application 파일에 VIA_DTO 설정을 추가함
 		Page<UserInfo> resultPage = userInfoRepository.getUserList(searchParam, page);
-		System.out.println("[Impl]");
-		System.out.println(resultPage.toString());
 		
 		return resultPage.map(UserInfoResponse::from);
 	}

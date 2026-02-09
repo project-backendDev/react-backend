@@ -32,8 +32,8 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED) // 기본 생성자 protected
 @AllArgsConstructor // 모든 필드를 포함한 생성자
-@Builder // 👈 Builder 패턴 추가
-@Table(name = "user_info") // DDL의 테이블 이름과 매핑
+@Builder 
+@Table(name = "user_info") 
 @EntityListeners(AuditingEntityListener.class) // JPA Auditing 활성화
 public class UserInfo implements UserDetails {
 
@@ -80,6 +80,9 @@ public class UserInfo implements UserDetails {
     @Column(name = "EDIT_DATE", nullable = false)
     private Date editDate;
 
+    /* 탈퇴일 */
+    @Column(name = "WITHDRAW_DATE", nullable = false)
+    private Date withdrawDate;
     
     /**
      * 사용자의 권한(ROLE) 반환
