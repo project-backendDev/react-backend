@@ -1,12 +1,13 @@
 package com.project.userInfo.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.project.userInfo.model.UserInfo;
 
-public interface UserInfoRepository extends JpaRepository<UserInfo, Integer> {
+public interface UserInfoRepository extends JpaRepository<UserInfo, Integer>, UserInfoRepositoryCustom {
 
 	// 아이디 중복체크
 	boolean existsByUserId(String userId);
@@ -16,6 +17,12 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Integer> {
     
     // 로그인 시 사용
     Optional<UserInfo> findByUserId(String userId);
+
+    // [관리자] 회원탈퇴 (상태 Y -> N)
+    List<UserInfo> findByUserIdIn(List<String> userIds);
+    
+    // [관리자] 회원탈퇴
+//	void deleteByUserIdIn(List<String> userIds);
     
     // [관리자] 단일회원 상세정보 조회
 //    AdminUserInfoDetail getUserDetail(String userId);

@@ -2,13 +2,17 @@ package com.project.userInfo.service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.cmm.PageRequestDto;
+import com.project.cmm.SearchRequestDto;
 import com.project.exception.DuplicateDataException;
 import com.project.userInfo.model.UserInfo;
 import com.project.userInfo.repository.UserInfoRepository;
@@ -22,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserInfoService {
 
 	private final UserInfoRepository userInfoRepository;
@@ -68,10 +73,9 @@ public class UserInfoService {
 	 * @param userId
 	 * @param userPw
 	 */
-	@Transactional(readOnly = true)
 	public void confirmPassword(String userId, String userPw) {
 		
-		// DB에서 현재 사용자 정보 획득
+		// 회원 존재여부 확인
 		UserInfo userInfo = userInfoRepository.findByUserId(userId)
 				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
 		
@@ -86,9 +90,8 @@ public class UserInfoService {
 	 * @param userId
 	 * @return
 	 */
-	@Transactional(readOnly = true)
 	public UserInfoResponse getUserInfo(String userId) {
-		
+		// 회원 존재여부 확인
 		UserInfo userInfo = userInfoRepository.findByUserId(userId)
 							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
 		
@@ -103,7 +106,7 @@ public class UserInfoService {
 	@Transactional
 	public void userUpdate(UserInfoUpdateRequest userInfoUpdateRequest, String userId) {
 		
-		// 현재 로그인 한 사용자를 찾음
+		// 회원 존재여부 확인
 		UserInfo userInfo = userInfoRepository.findByUserId(userId)
 							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 		
@@ -127,13 +130,11 @@ public class UserInfoService {
 	@Transactional
 	public void userDelete(String userId) {
 		
-		// 현재 로그인 한 사용자를 찾음
+		// 회원 존재여부 확인
 		UserInfo userInfo = userInfoRepository.findByUserId(userId)
 							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 
 		String randomPassword = UUID.randomUUID().toString();
-		System.out.println("PWD");
-		System.out.println(randomPassword);
 		String encPassword = passwordEncoder.encode(randomPassword);
 		String anonyEmail = userInfo.getUserSeq() + "@delete.com";
 		
@@ -146,22 +147,37 @@ public class UserInfoService {
 	/*
 	 * [관리자]
 	 * 전체 회원 조회 메소드
+	 * 25.12.22
+	 * 페이징 처리 된 형태로 다시 작성
 	 */
-	@Transactional(readOnly = true)
-	public List<UserInfoResponse> getAllUserList() {
-		return userInfoRepository.findAll()
-					.stream()
-					.map(UserInfoResponse::from)
-					.collect(Collectors.toList());
+//	public List<UserInfoResponse> getAllUserList() {
+//		return userInfoRepository.findAll()
+//					.stream()
+//					.map(UserInfoResponse::from)
+//					.collect(Collectors.toList());
+//	}
+	
+	public Page<UserInfoResponse> getAllUserList(SearchRequestDto searchParam, PageRequestDto pageParam) {
+		Pageable page = pageParam.getPageable(Sort.by("regDate").descending());
+		
+		// 이대로 관리자 페이지에서 user-list를 호출하면 아래 오류가 뜸
+		// Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+		// 안전성 보장이 되지 않아 뜨는 오류여서 application 파일에 VIA_DTO 설정을 추가함
+		Page<UserInfo> resultPage = userInfoRepository.getUserList(searchParam, page);
+		System.out.println("[Impl]");
+		System.out.println(resultPage.toString());
+		
+		return resultPage.map(UserInfoResponse::from);
 	}
+	
 
 	/**
 	 * [관리자] 단일 회원 조회 메소드
 	 * @param userId
 	 * @return
 	 */
-	@Transactional(readOnly = true)
 	public AdminUserInfoDetail getUserDetail(String userId) {
+		// 회원 존재여부 확인
 		UserInfo userInfo = userInfoRepository.findByUserId(userId)
 							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
 		
@@ -171,10 +187,46 @@ public class UserInfoService {
 	/**
 	 * [관리자] 단일 회원 정보수정
 	 */
-//	@Transactional
-//	public void AdminUserInfoUpdate adminUpdateUserInfo(String userId, AdminUserInfoUpdate adminUserInfoUpdate) {
-//		UserInfo userInfo = userInfoRepository.findByUserId(userId)
-//				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-//	}
+	@Transactional
+	public void adminUpdateUserInfo(String userId, AdminUserInfoUpdate adminUserInfoUpdate) {
+		// 회원 존재여부 확인
+		UserInfo userInfo = userInfoRepository.findByUserId(userId)
+							.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+		
+		userInfo.adminUpdateUserInfo(adminUserInfoUpdate.getUserNm()
+								   , adminUserInfoUpdate.getUserEmail()
+								   , adminUserInfoUpdate.getRole()
+								   , adminUserInfoUpdate.getStatus());
+	}
 	
+	/**
+	 * [관리자] (단건/다건) 회원 정보삭제
+	 * @param userId
+	 */
+	@Transactional
+	public void adminDeleteUserInfo(List<String> userIds) {
+		
+		if (userIds == null || userIds.isEmpty()) {
+			return;
+		}
+		
+		// 체크된 id의 유저를 조회
+		List<UserInfo> userInfoList = userInfoRepository.findByUserIdIn(userIds);
+		
+		// randomPassword와 encPassword를 for문에 넣으면 대량 데이터 실행 시 성능이슈가 생길것 같아 밖으로 빼냄
+		String randomPassword = UUID.randomUUID().toString();
+		String encPassword = passwordEncoder.encode(randomPassword);
+		
+		// 체크된 유저 리스트를 for문 돌려서 탈퇴회원으로 변경
+		for (UserInfo userInfo : userInfoList) {
+			String anonyEmail = userInfo.getUserSeq() + "@delete.com";
+			
+			userInfo.setUserNm("탈퇴회원");
+			userInfo.setUserPw(encPassword);
+			userInfo.setUserEmail(anonyEmail);
+			userInfo.setStatus("N");
+		}
+		
+		
+	}
 }

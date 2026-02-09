@@ -129,4 +129,19 @@ public class UserInfo implements UserDetails {
 //        this.role = role;
 //    }
     
+    /**
+     * 관리자 페이지에서 사용자 정보 수정
+     * @param userNm - 사용자 이름
+     * @param userEmail - 사용자 이메일
+     * @param role - 권한
+     * @param status - 계정 활성화 상태 (Y/N)
+     */
+    public void adminUpdateUserInfo(String userNm, String userEmail, String role, String status) {
+    	this.userNm = userNm;
+    	this.userEmail = userEmail;
+    	this.role = role;
+    	this.status = status;
+    	this.editDate = new Date();
+    }
+    
 }

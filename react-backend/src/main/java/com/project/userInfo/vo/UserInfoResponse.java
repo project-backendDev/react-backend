@@ -18,7 +18,12 @@ public class UserInfoResponse {
     
     private String userEmail;
     
+    private String role;
+    
+    private String status;
+    
     private Date regDate;
+    
     
     public static UserInfoResponse from(UserInfo userInfo) {
         return UserInfoResponse.builder()
@@ -26,6 +31,8 @@ public class UserInfoResponse {
                 .userId(userInfo.getUserId())
                 .userNm(userInfo.getUserNm())
                 .userEmail(userInfo.getUserEmail())
+                .status(userInfo.getStatus())
+                .role(userInfo.getRole())
                 .regDate(userInfo.getRegDate())
                 .build();
     }

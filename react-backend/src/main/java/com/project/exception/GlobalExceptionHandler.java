@@ -40,13 +40,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleAuthenticationException(Exception e) {
         // ID가 없거나, PW가 틀리면 401 Unauthorized 에러 반환
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED) 
-                .body("아이디 또는 비밀번호가 올바르지 않습니다.");
+                			 .body("아이디 또는 비밀번호가 올바르지 않습니다.");
     }
 
     @ExceptionHandler({DisabledException.class})
     public ResponseEntity<String> handleDisabledException(Exception e) {
     	return ResponseEntity.status(HttpStatus.NOT_FOUND)
-    			.body("탈퇴한 사용자입니다.");
+    						 .body("탈퇴한 사용자입니다.");
     }
     
     /**

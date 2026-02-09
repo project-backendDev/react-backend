@@ -64,6 +64,7 @@ public class SecurityConfig {
             // 4. API 경로별 권한 설정
             .authorizeHttpRequests(authorize -> authorize
                 // 회원가입, 로그인은 누구나 허용 (permitAll)
+//                .requestMatchers("/api/user/signup", "/api/user/login", "/api/mngr/user-list", "/api/mngr/user/${userId}").permitAll()
                 .requestMatchers("/api/user/signup", "/api/user/login").permitAll()
                 // 관리자 API는 "ROLE_ADMIN" 권한 필요 (ROLE_ 제외하고 "ADMIN"만 씀)
                 .requestMatchers("/api/mngr/**").hasRole("ADMIN") 
