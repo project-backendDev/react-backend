@@ -34,24 +34,19 @@ public class LoginService {
 	 */
 	@Transactional
 	public LoginResponse loginProcess(LoginRequest loginRequest) throws AuthenticationException {
-		System.out.println("[S]	Login Process");
 		try {
-			// 1. AuthenticationManager에게 "인증"을 요청
-			//    (이 과정에서 loadUserByUsername이 호출되고, 비밀번호 비교가 자동으로 일어남)
+			// AuthenticationManager에게 "인증"을 요청
+			// 이 과정에서 loadUserByUsername이 호출되고, 비밀번호 비교가 자동으로 일어남
 			Authentication authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(
 							loginRequest.getUserId(),
 							loginRequest.getUserPw()
 							)
 					);
-			System.out.println(authentication);
-			System.out.println();
 			
-			// 2. 인증에 성공했다면, JwtUtil을 이용해 "권한이 포함된" 토큰을 생성
+			// 인증 성공 -> JwtUtil을 이용해 토큰 생성
 			String token = jwtUtil.generateToken(authentication);
-			System.out.println(token);
 			
-			// 3. 토큰을 DTO에 담아 반환
 			return new LoginResponse(token);
 			
 		} catch (DisabledException e) {

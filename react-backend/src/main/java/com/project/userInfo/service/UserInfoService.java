@@ -160,11 +160,12 @@ public class UserInfoService {
 //	}
 	
 	public Page<UserInfoResponse> getAllUserList(SearchRequestDto searchParam, PageRequestDto pageParam) {
+		
 		Pageable page = pageParam.getPageable(Sort.by("regDate").descending());
 		
 		// 이대로 관리자 페이지에서 user-list를 호출하면 아래 오류가 뜸
 		// Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
-		// 안전성 보장이 되지 않아 뜨는 오류여서 application 파일에 VIA_DTO 설정을 추가함
+		// 안전성 보장이 되지 않는다고 해서 뜨는 오류여서 application.properties 파일에 VIA_DTO 설정을 추가함
 		Page<UserInfo> resultPage = userInfoRepository.getUserList(searchParam, page);
 		
 		return resultPage.map(UserInfoResponse::from);
