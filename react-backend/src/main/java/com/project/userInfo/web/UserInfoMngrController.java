@@ -66,7 +66,7 @@ public class UserInfoMngrController {
 	 * @param adminUserInfoDelete
 	 * @return
 	 */
-	@DeleteMapping("/user/{userId}")
+	@DeleteMapping("/user")
 	public ResponseEntity<String> userDelete(@RequestBody AdminUserInfoDelete adminUserInfoDelete) {
 		
 		userService.adminDeleteUserInfo(adminUserInfoDelete.getUserIds());

@@ -1,3 +1,5 @@
+--------------------------------------------------------------------------
+
 CREATE SCHEMA `project` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci ;
 
 --------------------------------------------------------------------------
@@ -11,6 +13,7 @@ CREATE TABLE `project`.`user_info` (
   `ROLE` VARCHAR(50) NOT NULL DEFAULT 'ROLE_USER' COMMENT '권한',
   `LOGIN_TYPE` VARCHAR(10) NOT NULL DEFAULT 'LOGIN_TYPE' COMMENT '로그인 타입 (사이트, 카카오, 네이버, 구글)',
   `STATUS` VARCHAR(1) NOT NULL DEFAULT 'Y' COMMENT '계정 상태 (Y:활성, N:탈퇴)',
+  `FAIL_COUNT` int DEFAULT '0' COMMENT '비밀번호 실패 횟수',
   `REG_DATE` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일',
   `EDIT_DATE` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일',
   `WITHDRAW_DATE` DATETIME DEFAULT NULL COMMENT '탈퇴일',
@@ -21,6 +24,24 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 COLLATE = utf8mb4_0900_ai_ci
 COMMENT = '유저 데이터 테이블';
+
+--------------------------------------------------------------------------
+
+CREATE TABLE `project`.`user_login_log` (
+    LOG_SEQ BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '로그 번호',
+    USER_ID VARCHAR(50) COMMENT '로그인 아이디',
+    LOGIN_DATE DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '로그인 날짜',
+    IP_ADDRESS VARCHAR(50) COMMENT '접속 IP 주소 (IPv4/IPv6)',
+    USER_AGENT VARCHAR(500) COMMENT '접속 기기 및 브라우저 정보 (User-Agent)',
+    IS_SUCCESS CHAR(1) NOT NULL COMMENT '로그인 성공 여부 (Y/N)',
+    FAIL_REASON VARCHAR(100) COMMENT '실패 사유'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='로그인 이력 테이블';
+
+-- 아이디 검색 인덱스
+CREATE INDEX idx_user_login_log_user_id ON user_login_log (USER_ID);
+
+-- 날짜 검색 인덱스
+CREATE INDEX idx_user_login_log_date ON user_login_log (LOGIN_DATE);
 
 --------------------------------------------------------------------------
 

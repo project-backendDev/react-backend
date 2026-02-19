@@ -24,19 +24,15 @@ public class UserInfoRepositoryImpl implements UserInfoRepositoryCustom {
 	
 	@Override
 	public Page<UserInfo> getUserList(SearchRequestDto searchDto, Pageable pageable) {
-		// 1. 리스트 조회
-        List<UserInfo> content = queryFactory
-                // ★ [핵심 해결 3] select(userInfo).from(...) 대신 selectFrom(...) 사용
-                // 이렇게 하면 '1번 오류'가 해결됩니다.
+        
+		List<UserInfo> content = queryFactory
                 .selectFrom(userInfo)
                 .where(searchCondition(searchDto.getSearchType(), searchDto.getKeyword()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                // '2번 오류' 해결: 위에서 java.util.Date를 import 했으므로 이제 인식됨
                 .orderBy(userInfo.regDate.desc()) 
                 .fetch();
 
-        // 2. 카운트 조회
         JPAQuery<Long> countQuery = queryFactory
                 .select(userInfo.count())
                 .from(userInfo)
@@ -50,7 +46,6 @@ public class UserInfoRepositoryImpl implements UserInfoRepositoryCustom {
             return null;
         }
 
-        // '3번 오류' 해결: 관련 import가 다 들어갔으므로 StringPath 오류 사라짐
         if ("userId".equals(searchType)) {
             return userInfo.userId.contains(keyword);
         } else if ("userName".equals(searchType)) {

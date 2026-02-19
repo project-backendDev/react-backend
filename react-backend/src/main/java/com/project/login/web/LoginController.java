@@ -10,6 +10,7 @@ import com.project.login.service.LoginService;
 import com.project.login.vo.LoginRequest;
 import com.project.login.vo.LoginResponse;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -24,8 +25,9 @@ public class LoginController {
 	 * 로그인 API
 	 */
 	@PostMapping("/user/login")
-	public ResponseEntity<LoginResponse> loginProcess(@Valid @RequestBody LoginRequest loginRequest) {
-		return ResponseEntity.ok(loginService.loginProcess(loginRequest));
+	public ResponseEntity<LoginResponse> loginProcess(@Valid @RequestBody LoginRequest loginRequest,
+													  HttpServletRequest request) {
+		return ResponseEntity.ok(loginService.loginProcess(loginRequest, request));
 	}
 	
 }

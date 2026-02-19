@@ -39,8 +39,8 @@ public class UserInfo implements UserDetails {
 
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "USER_SEQ") // DDL의 컬럼명과 매핑
-    private Integer userSeq; // DDL에서 INT이므로 Integer (Long도 괜찮음)
+    @Column(name = "USER_SEQ")
+    private Integer userSeq;
 
 	/* 아이디 */
     @Column(name = "USER_ID", nullable = false, unique = true, length = 20)
@@ -69,6 +69,10 @@ public class UserInfo implements UserDetails {
     /* 계정상태 (활성 : Y / 비활성 : N) */
     @Column(name = "STATUS", nullable = false, length = 10)
     private String status;
+    
+    /* 로그인 실패 횟수 */
+    @Column(name = "FAIL_COUNT", nullable = false, length = 10)
+    private int failCount;
     
     /* 생성일 */
     @CreatedDate // 엔티티 생성 시 자동 저장

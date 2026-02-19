@@ -146,6 +146,56 @@ public class UserInfoService {
 		userInfo.setWithdrawDate(new Date());
 	}
 	
+	
+	/**
+	 * 로그인 실패 시 카운트 증가
+	 * @param userId
+	 * @return
+	 */
+	@Transactional
+    public int incrementFailCount(String userId) {
+
+		// 회원 존재여부 확인
+		UserInfo userInfo = userInfoRepository.findByUserId(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+        
+        int newFailCount = userInfo.getFailCount() + 1;
+        
+        userInfo.setFailCount(newFailCount);
+        
+        return newFailCount; 
+    }
+	
+	/**
+	 * 로그인 성공 시 실패 횟수 초기화
+	 * @param userId
+	 */
+	@Transactional
+    public void resetFailCount(String userId) {
+
+		// 회원 존재여부 확인
+		UserInfo userInfo = userInfoRepository.findByUserId(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+        
+		userInfo.setFailCount(0); 
+    }
+	
+	/**
+	 * 5회 실패 시 계정상태 변경
+	 * @param userId
+	 */
+	@Transactional
+    public void lockUserAccount(String userId) {
+		
+		// 회원 존재여부 확인
+		UserInfo userInfo = userInfoRepository.findByUserId(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+        
+        // 계정 상태변경
+		userInfo.setStatus("N"); 
+    }
+	
+	
 	/*
 	 * [관리자]
 	 * 전체 회원 조회 메소드
