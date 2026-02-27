@@ -67,6 +67,26 @@ public class UserInfoService {
 		// 생성된 엔티티를 저장
 		userInfoRepository.save(userInfo);
 	}
+	
+	
+	/**
+	 * SNS 회원가입 여부 확인
+	 * @param userId
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+    public boolean existsByUserId(String userId) {
+        return userInfoRepository.existsByUserId(userId);
+    }
+	
+	/**
+	 * SNS 회원가입
+	 * @param userInfo
+	 */
+	@Transactional
+	public void saveSocialUser(UserInfo userInfo) {
+		userInfoRepository.save(userInfo);
+	}
 
 	
 	/**

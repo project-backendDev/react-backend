@@ -66,6 +66,8 @@ public class SecurityConfig {
                 // 회원가입, 로그인은 누구나 허용 (permitAll)
 //                .requestMatchers("/api/user/signup", "/api/user/login", "/api/mngr/user-list", "/api/mngr/user/${userId}").permitAll()
                 .requestMatchers("/api/user/signup", "/api/user/login").permitAll()
+                // SNS 로그인은 누구나 허용
+                .requestMatchers("/api/user/oauth2/**").permitAll()
                 // 관리자 API는 "ROLE_ADMIN" 권한 필요 (ROLE_ 제외하고 "ADMIN"만 씀)
                 .requestMatchers("/api/mngr/**").hasRole("ADMIN") 
                 // 그 외 /api/로 시작하는 모든 요청은 인증(로그인) 필요
