@@ -43,7 +43,7 @@ public class UserInfo implements UserDetails {
     private Integer userSeq;
 
 	/* 아이디 */
-    @Column(name = "USER_ID", nullable = false, unique = true, length = 20)
+    @Column(name = "USER_ID", nullable = false, unique = true, length = 100)
     private String userId;
 
     /* 비밀번호 */
@@ -55,7 +55,7 @@ public class UserInfo implements UserDetails {
     private String userNm;
 
     /* 이메일 */
-    @Column(name = "USER_EMAIL", nullable = false, unique = true, length = 100)
+    @Column(name = "USER_EMAIL", nullable = false, length = 100)
     private String userEmail;
 
     /* 권한 */
